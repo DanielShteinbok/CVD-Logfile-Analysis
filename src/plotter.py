@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import datetime
+import logmanipulator
 
 def processDate(dateString):
     """
@@ -25,10 +26,13 @@ def processTime(timeString):
         time (datetime.timedelta)
     """
     hours, minutes, seconds = map(int, timeString.split(':'))
-    return datetime.timedelta(hours=hours, minutes=minutes, seconds=seconds)
+    return datetime.time(hour=hours, minute=minutes, second=seconds)
+
+def runtimeCalculator(date, time):
+    return (datetime.datetime.combine(date,time)-datetime.datetime.combine(date,datetime.time.min)).total_seconds()
     
 
-def processToBigDict(dictReader, dateConverter=processDate, timeConverter=processTime, runtimeCalculator=(lambda timedelta : timedelta.seconds)):
+def processToBigDict(dictReader, dateConverter=processDate, timeConverter=processTime, runtimeCalculator=runtimeCalculator):
     """
     Makes a dictionary of {key : data} where data is an ordered list, out of a csv.DictReader.
     This is meant to conform to the pyplot signature of:
@@ -36,7 +40,7 @@ def processToBigDict(dictReader, dateConverter=processDate, timeConverter=proces
 
     adds a runtime value, which is an integer ndarray, representing the time in the run (accounts for time of day, etc) so that it is easy to plot.
     """
-    # TODO: what if one of the values is None?
+    # TODO: what if one of the values is None? ANSWER: it should be masked. To mask, seems like you need to make an ndarray with NaN for the None values
     # TODO: what if the process runs through midnight?
     # TODO: take function parameters for calculation of date, time, and runtime
     # TODO: make masked arrays for all values, where None is masked
@@ -58,8 +62,13 @@ def processToBigDict(dictReader, dateConverter=processDate, timeConverter=proces
     # generate masked numpy array for A3
     allDataDict["A3 (974)"] = np.fromiter(map(lambda val : (np.NaN if val is None else float(val)), allDataDict["A3 (974)"]), dtype=float)
     allDataDict["A3 (974)"] = np.ma.masked_where(np.isnan(allDataDict["A3 (974)"]), allDataDict["A3 (974)"])
-    allDataDict["runtime"] = np.fromiter(map(runtimeCalculator, allDataDict["Time"]), dtype=int)
+    allDataDict["runtime"] = np.fromiter(map(runtimeCalculator, allDataDict["Date"], allDataDict["Time"]), dtype=int)
 
     return allDataDict
 
-
+def plotLog(filenames):
+    for filename in filenames:
+        with open(filename) as file:
+            plt.plot("runtime", "A3 (974)", data=processToBigDict(logmanipulator.dictReaderWrapper(file)), label=filename)
+    plt.legend()
+    plt.show()
