@@ -1,13 +1,40 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import datetime
 
-def processToBigDict(dictReader, dateConverter, timeConverter, runtimeCalculator):
+def processDate(dateString):
+    """
+    produces datetime.date object from a provided dateString
+
+    Parameters:
+        dateString (String) : the slash-delimited date, e.g. 24/08/2021 to represent Aug 24, 2021
+    Returns:
+        date (datetime.date)
+    """
+    day, month, year = map(int, dateString.split('/'))
+    return datetime.date(year, month, day)
+
+def processTime(timeString):
+    """
+    produces datetime.timedelta object from a provided timeString
+    it seems that the recorded time in the logfiles is actually time from starting, not absolute time in the day. Therefore, timedelta is more appropriate
+
+    Parameters:
+        timeString (String) : the colon-delimited time delta, e.g. 00:04:53 to represent 0 hours, 4 minutes, 53 seconds
+    Returns:
+        time (datetime.timedelta)
+    """
+    hours, minutes, seconds = map(int, timeString.split(':'))
+    return datetime.timedelta(hours=hours, minutes=minutes, seconds=seconds)
+    
+
+def processToBigDict(dictReader, dateConverter=processDate, timeConverter=processTime, runtimeCalculator=(lambda timedelta : timedelta.seconds)):
     """
     Makes a dictionary of {key : data} where data is an ordered list, out of a csv.DictReader.
     This is meant to conform to the pyplot signature of:
     >> pyplot.plot('time', 'pressure', processToBigDict(reader))
 
-    adds a runtime value, which is an integer, representing the time in the run (accounts for time of day, etc).
+    adds a runtime value, which is an integer ndarray, representing the time in the run (accounts for time of day, etc) so that it is easy to plot.
     """
     # TODO: what if one of the values is None?
     # TODO: what if the process runs through midnight?
@@ -25,13 +52,14 @@ def processToBigDict(dictReader, dateConverter, timeConverter, runtimeCalculator
             allDataDict[key].append(row[key])
 
     # convert Dates to date format via dateConverter
-    #allDataDict["Date"] = map(dateConverter, allDataDict["Date"])
-    #allDataDict["Time"] = map(timeConverter, allDataDict["Time"])
+    allDataDict["Date"] = list(map(dateConverter, allDataDict["Date"]))
+    allDataDict["Time"] = list(map(timeConverter, allDataDict["Time"]))
 
     # generate masked numpy array for A3
     allDataDict["A3 (974)"] = np.fromiter(map(lambda val : (np.NaN if val is None else float(val)), allDataDict["A3 (974)"]), dtype=float)
     allDataDict["A3 (974)"] = np.ma.masked_where(np.isnan(allDataDict["A3 (974)"]), allDataDict["A3 (974)"])
-
+    allDataDict["runtime"] = np.fromiter(map(runtimeCalculator, allDataDict["Time"]), dtype=int)
 
     return allDataDict
+
 
