@@ -34,3 +34,17 @@ def open_logfile(filename):
     # now that the lines have been skipped, create the DictReader in question
     return csv.DictReader(file)
 
+def dictReaderWrapper(f, fieldnames=None, restkey=None, restval=None, dialect='excel', *args, **kwds):
+    """
+    A wrapper around csv.DictReader that just skips the first 8 lines, as above.
+    f is an open file (iterable).
+    See csv library documentation for details.
+    """
+    for i in range(8):
+        f.readline()
+
+    # now that the lines have been skipped, create the DictReader in question
+    return csv.DictReader(f, fieldnames, restkey, restval, dialect, *args, **kwds)
+
+
+
