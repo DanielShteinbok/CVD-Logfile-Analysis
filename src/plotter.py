@@ -1,4 +1,4 @@
-import matplotlib.pyplot as plt
+simport matplotlib.pyplot as plt
 import numpy as np
 import datetime
 import logmanipulator
@@ -59,9 +59,20 @@ def processToBigDict(dictReader, dateConverter=processDate, timeConverter=proces
     allDataDict["Date"] = list(map(dateConverter, allDataDict["Date"]))
     allDataDict["Time"] = list(map(timeConverter, allDataDict["Time"]))
 
+    #######################################################################
     # generate masked numpy array for A3
+    # turn this particular array to a numpy ndarray, with the None values converted to numpy.NaN (otherwise it tries to make the dtype Object, which will lead to problems down the road)
     allDataDict["A3 (974)"] = np.fromiter(map(lambda val : (np.NaN if val is None else float(val)), allDataDict["A3 (974)"]), dtype=float)
+
+    # mask the NaN values; this is where we would mask values that are too far off (which we consider to be erroneous) to distinguish between no data collected (NaN) and bad value (masked).
+    # TODO: identify the range outside of which we should consider values erroneous, mask outside that range (can replace np.isnan with an appropriate lambda
     allDataDict["A3 (974)"] = np.ma.masked_where(np.isnan(allDataDict["A3 (974)"]), allDataDict["A3 (974)"])
+
+    #######################################################################
+    # generate masked numpy array for temperature
+    # first, check whether there has been any record of temperature
+
+    # calculate the runtime, which will be the x-axis
     allDataDict["runtime"] = np.fromiter(map(runtimeCalculator, allDataDict["Date"], allDataDict["Time"]), dtype=int)
 
     return allDataDict
