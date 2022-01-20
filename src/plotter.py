@@ -1,4 +1,4 @@
-simport matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import numpy as np
 import datetime
 import logmanipulator
@@ -71,6 +71,16 @@ def processToBigDict(dictReader, dateConverter=processDate, timeConverter=proces
     #######################################################################
     # generate masked numpy array for temperature
     # first, check whether there has been any record of temperature
+    if len(allDataDict["Effective Temperature Oven"]) == 0 :
+        # in the case that there is no record, just make an ndarray with all NaN of the same length as the Date, which is the number of rows in the csv file
+        allDataDict["Effective Temperature Oven"] = np.full(len(allDataDict["Date"]), np.NaN)
+    else:
+        # in the case that there are some values, read the ones that are float, but convert the missing values (None) or "Oven OFF" values to NaN
+        # TODO: handle all non-float values; handle errors in float conversion, set these to NaN
+        allDataDict["Effective Temperature Oven"] = np.fromiter(map(lambda val : (np.NaN if (val is None) or (val == "Oven OFF") else float(val)), allDataDict["Effective Temperature Oven"]), dtype=float)
+
+    # mask all NaN values. TODO: mask non-NaN values that we consider out of range or something else
+    allDataDict["Effective Temperature Oven"] = np.ma.masked_where(np.isnan(allDataDict["Effective Temperature Oven"]), allDataDict["Effective Temperature Oven"])
 
     # calculate the runtime, which will be the x-axis
     allDataDict["runtime"] = np.fromiter(map(runtimeCalculator, allDataDict["Date"], allDataDict["Time"]), dtype=int)
