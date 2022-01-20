@@ -93,3 +93,16 @@ def plotLog(filenames):
             plt.plot("runtime", "A3 (974)", data=processToBigDict(logmanipulator.dictReaderWrapper(file)), label=filename)
     plt.legend()
     plt.show()
+
+def plotPressureAndTemp(filenames):
+    fig, pressure = plt.subplots()
+    temperature = pressure.twinx()
+    for filename in filenames:
+        with open(filename) as file:
+            fileDict = processToBigDict(logmanipulator.dictReaderWrapper(file))
+            pressure.plot("runtime", "A3 (974)", data=fileDict, label=filename)
+            temperature.plot("runtime", "Effective Temperature Oven", data=fileDict, label=filename)
+
+    plt.legend()
+    plt.show()
+
