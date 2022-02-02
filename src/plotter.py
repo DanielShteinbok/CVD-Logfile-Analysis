@@ -89,7 +89,7 @@ def processToBigDict(dictReader, dateConverter=processDate, timeConverter=proces
 
 def plotLog(filenames):
     for filename in filenames:
-        with open(filename) as file:
+        with open(filename, encoding="iso-8859-1") as file:
             plt.plot("runtime", "A3 (974)", data=processToBigDict(logmanipulator.dictReaderWrapper(file)), label=filename)
     plt.legend()
     plt.show()
