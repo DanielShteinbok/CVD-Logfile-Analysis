@@ -37,7 +37,7 @@ def plotLog(filenames, **kwargs):
     plt.legend()
     plt.show()
 
-def plotPressureAndTemp(filenames, figsize=(20, 10), **kwargs):
+def plotPressureAndTemp(filenames, figsize=(10, 5), **kwargs):
     fig, pressure = plt.subplots()
     fig.set_figwidth(figsize[0])
     fig.set_figheight(figsize[1])
@@ -51,7 +51,7 @@ def plotPressureAndTemp(filenames, figsize=(20, 10), **kwargs):
             temperature.plot("runtime", "Effective Temperature Oven", data=fileDict, label=filename + ", Temperature", **kwargs, linestyle=':')
             temperature.set_ylabel("Temperature, Celsuis")
 
-    pressure.legend()
-    temperature.legend()
+    pressure.legend(loc="lower left")
+    temperature.legend(loc="lower right")
     plt.show()
 
