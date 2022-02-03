@@ -29,21 +29,29 @@ def processTime(timeString):
     return datetime.time(hour=hours, minute=minutes, second=seconds)
 
 def plotLog(filenames, **kwargs):
+    plt.yscale("log")
     for filename in filenames:
         with open(filename, encoding="iso-8859-1") as file:
             plt.plot("runtime", "A3 (974)", data=logmanipulator.processToBigDict(logmanipulator.dictReaderWrapper(file)), label=filename, **kwargs)
+    plt.ylabel("Pressure, Torr")
     plt.legend()
     plt.show()
 
-def plotPressureAndTemp(filenames, **kwargs):
+def plotPressureAndTemp(filenames, figsize=(20, 10), **kwargs):
     fig, pressure = plt.subplots()
+    fig.set_figwidth(figsize[0])
+    fig.set_figheight(figsize[1])
     temperature = pressure.twinx()
     for filename in filenames:
         with open(filename, encoding="iso-8859-1") as file:
             fileDict = logmanipulator.processToBigDict(logmanipulator.dictReaderWrapper(file))
-            pressure.plot("runtime", "A3 (974)", data=fileDict, label=filename, **kwargs)
-            temperature.plot("runtime", "Effective Temperature Oven", data=fileDict, label=filename, **kwargs)
+            pressure.plot("runtime", "A3 (974)", data=fileDict, label=filename + ", Pressure", **kwargs, linestyle='-')
+            pressure.set_yscale("log")
+            pressure.set_ylabel("Pressure, Torr")
+            temperature.plot("runtime", "Effective Temperature Oven", data=fileDict, label=filename + ", Temperature", **kwargs, linestyle=':')
+            temperature.set_ylabel("Temperature, Celsuis")
 
-    plt.legend()
+    pressure.legend()
+    temperature.legend()
     plt.show()
 
