@@ -37,14 +37,14 @@ def plotLog(filenames, **kwargs):
     plt.legend()
     plt.show()
 
-def plotPressureAndTemp(filenames, figsize=(10, 5), **kwargs):
+def plotPressureAndTemp(filenames, figsize=(10, 5), areGrowthLogs=True, **kwargs):
     fig, pressure = plt.subplots()
     fig.set_figwidth(figsize[0])
     fig.set_figheight(figsize[1])
     temperature = pressure.twinx()
     for filename in filenames:
         with open(filename, encoding="iso-8859-1") as file:
-            fileDict = logmanipulator.processToBigDict(logmanipulator.dictReaderWrapper(file))
+            fileDict = logmanipulator.processToBigDict(logmanipulator.dictReaderWrapper(file), isGrowthLog=areGrowthLogs)
             pressure.plot("runtime", "A3 (974)", data=fileDict, label=filename + ", Pressure", **kwargs, linestyle='-')
             pressure.set_yscale("log")
             pressure.set_ylabel("Pressure, Torr")
