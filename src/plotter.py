@@ -3,31 +3,6 @@ import numpy as np
 import datetime
 import logmanipulator
 
-def processDate(dateString):
-    """
-    produces datetime.date object from a provided dateString
-
-    Parameters:
-        dateString (String) : the slash-delimited date, e.g. 24/08/2021 to represent Aug 24, 2021
-    Returns:
-        date (datetime.date)
-    """
-    day, month, year = map(int, dateString.split('/'))
-    return datetime.date(year, month, day)
-
-def processTime(timeString):
-    """
-    produces datetime.timedelta object from a provided timeString
-    it seems that the recorded time in the logfiles is actually time from starting, not absolute time in the day. Therefore, timedelta is more appropriate
-
-    Parameters:
-        timeString (String) : the colon-delimited time delta, e.g. 00:04:53 to represent 0 hours, 4 minutes, 53 seconds
-    Returns:
-        time (datetime.timedelta)
-    """
-    hours, minutes, seconds = map(int, timeString.split(':'))
-    return datetime.time(hour=hours, minute=minutes, second=seconds)
-
 def plotLog(filenames, **kwargs):
     plt.yscale("log")
     for filename in filenames:
@@ -53,5 +28,4 @@ def plotPressureAndTemp(filenames, figsize=(10, 5), areGrowthLogs=True, **kwargs
 
     pressure.legend(loc="lower left")
     temperature.legend(loc="lower right")
-    plt.show()
-
+    return fig
