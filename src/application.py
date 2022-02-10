@@ -81,11 +81,12 @@ class FileEntryMan:
             if self.head is not None:
                 self.head.prevNode = None
         else:
-            fileEntry.nextNode.prevNode = fileEntry.prevNode
+            if fileEntry.nextNode is not None:
+                fileEntry.nextNode.prevNode = fileEntry.prevNode
             fileEntry.prevNode.nextNode = fileEntry.nextNode
         fileEntry.destroy()
         del fileEntry
-        self.currentIndex -= 1
+        #self.currentIndex -= 1
 
 
 root = Tk()
