@@ -17,6 +17,74 @@ from matplotlib import pyplot as plt
 #plotter.plotPressureAndTemp(files)
 #plt.ion()
 
+class FileEntry:
+    """
+    A single FileEntry object keeps a reference to
+    the text and button related to the file entry,
+    and remembers the name of the file in question.
+    """
+    def __init__(self, label, button, filename):
+        self.label = label
+        self.button = button
+        self.filename = filename
+
+        # FileEntries will be nodes in a doubly-linked list
+        self.nextNode = None
+        self.prevNode = None
+
+    def getFilename(self):
+        return self.filename
+
+    def __del__(self):
+        print("destroys should be called")
+        self.label.destroy()
+        self.button.destroy()
+
+class FileEntryMan:
+    """
+    A manager class that holds all FileEntry objects.
+    Holds a doulby-linked list of FileEntries,
+    can traverse this list to return a python list of file name strings,
+    can allow for deletion of a particular FileEntry by reference
+    """
+
+    def __init__(self):
+        self.head = None
+        self.currentIndex = 0
+
+    def addFileEntry(self, fileEntry):
+        # stick the new FileEntry after the head
+        fileEntry.nextNode = self.head
+
+        # if the head is a FileEntry, its prevNode must be updated
+        if self.head is not None:
+            self.head.prevNode = fileEntry
+
+        # set the head to be the new fileEntry
+        self.head = fileEntry
+        self.currentIndex += 1
+
+    def fileNames(self):
+        filenames = []
+        currentNode = self.head
+        while currentNode is not None:
+            filenames.append(currentNode.getFilename())
+            currentNode = currentNode.nextNode
+        return filenames
+
+    def removeFileEntry(self, fileEntry):
+        if fileEntry is self.head:
+            print("filEntry is self.head")
+            self.head = self.head.nextNode
+            if self.head is not None:
+                self.head.prevNode = None
+        else:
+            fileEntry.nextNode.prevNode = fileEntry.prevNode
+            fileEntry.prevNode.nextNode = fileEntry.nextNode
+        del fileEntry
+        self.currentIndex -= 1
+
+
 root = Tk()
 root.title("Logfile Analysis")
 root.geometry("800x500")
@@ -24,8 +92,10 @@ root.geometry("800x500")
 mainframe = ttk.Frame(root)
 mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
 
-files = []
-gui_rows = []
+#files = []
+#gui_rows = []
+
+files = FileEntryMan()
 
 # eventually, the below will be a scollable list of files to load
 canvas_container=Canvas(mainframe, height=100)
@@ -40,41 +110,48 @@ def plotToCanvas():
     #canvas.draw()
     #canvas.get_tk_widget().grid(column=2, row=1)
     #return canvas
-    figure = plotter.plotPressureAndTemp(files)
+    print(files.fileNames())
+    figure = plotter.plotPressureAndTemp(files.fileNames())
     plt.show()
 
 def addFile():
     filename = filedialog.askopenfilename()
-    files.append(filename)
+    #files.append(filename)
 
-    gui_row = []
+    #gui_row = []
     label = ttk.Label(frame2, text=filename)
-    label.grid(column=0, row=len(files)-1)
+    label.grid(column=0, row=files.currentIndex)
 
     button = ttk.Button(frame2, text="-")
-    button.grid(column=1, row=len(files)-1)
-    button.bind("<Button-1>", lambda event: removeFile(button))
+    button.grid(column=1, row=files.currentIndex)
 
-    gui_row.append(label)
-    gui_row.append(button)
-    gui_rows.append(gui_row)
+    #gui_row.append(label)
+    #gui_row.append(button)
+    #gui_rows.append(gui_row)
+
+    fileEntry = FileEntry(label, button, filename)
+    button.bind("<Button-1>", lambda event: removeFile(fileEntry))
+
+    files.addFileEntry(fileEntry)
     canvas_container.configure(yscrollcommand=verticalScroll.set, scrollregion="0 0 0 %s" % frame2.winfo_height()) # the scrollregion mustbe the size of the frame inside it,
                                                                                                             #in this case "x=0 y=0 width=0 height=frame2height"
                                                                                                             #width 0 because we only scroll verticaly so don't mind about the width.
-
     frame2.update()
     plotToCanvas()
 
-def removeFile(button):
-    index = button.grid_info()["row"]
-    print(index)
-    files.pop(index)
-    for element in gui_rows[index]:
-        element.destroy()
-    gui_rows.pop(index)
-    canvas_container.configure(yscrollcommand=verticalScroll.set, scrollregion="0 0 0 %s" % frame2.winfo_height()) # the scrollregion mustbe the size of the frame inside it
+def removeFile(fileEntry):
+    files.removeFileEntry(fileEntry)
     frame2.update()
     plotToCanvas()
+    #index = button.grid_info()["row"]
+    #print(index)
+    #files.pop(index)
+    #for element in gui_rows[index]:
+        #element.destroy()
+    #gui_rows.pop(index)
+    #canvas_container.configure(yscrollcommand=verticalScroll.set, scrollregion="0 0 0 %s" % frame2.winfo_height()) # the scrollregion mustbe the size of the frame inside it
+    #frame2.update()
+    #plotToCanvas()
 
 ttk.Label(mainframe, text="Files:").grid(column=0, row=0)
 ttk.Button(mainframe, text="+", command=addFile).grid(column=1, row=0)
