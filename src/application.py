@@ -19,6 +19,7 @@ from matplotlib import pyplot as plt
 
 root = Tk()
 root.title("Logfile Analysis")
+root.geometry("800x500")
 
 mainframe = ttk.Frame(root)
 mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
@@ -26,6 +27,7 @@ mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
 files = []
 gui_rows = []
 
+# eventually, the below will be a scollable list of files to load
 canvas_container=Canvas(mainframe, height=100)
 frame2=Frame(canvas_container)
 verticalScroll=Scrollbar(mainframe,orient="vertical",command=canvas_container.yview) # will be visible if the frame2 is to to big for the canvas
@@ -56,6 +58,9 @@ def addFile():
     gui_row.append(label)
     gui_row.append(button)
     gui_rows.append(gui_row)
+    canvas_container.configure(yscrollcommand=verticalScroll.set, scrollregion="0 0 0 %s" % frame2.winfo_height()) # the scrollregion mustbe the size of the frame inside it,
+                                                                                                            #in this case "x=0 y=0 width=0 height=frame2height"
+                                                                                                            #width 0 because we only scroll verticaly so don't mind about the width.
 
     frame2.update()
     plotToCanvas()
@@ -67,14 +72,14 @@ def removeFile(button):
     for element in gui_rows[index]:
         element.destroy()
     gui_rows.pop(index)
-
+    canvas_container.configure(yscrollcommand=verticalScroll.set, scrollregion="0 0 0 %s" % frame2.winfo_height()) # the scrollregion mustbe the size of the frame inside it
     frame2.update()
     plotToCanvas()
 
 ttk.Label(mainframe, text="Files:").grid(column=0, row=0)
 ttk.Button(mainframe, text="+", command=addFile).grid(column=1, row=0)
 canvas_container.grid(column=0, row=1)
-verticalScroll.grid(column=1, row=1)
+#verticalScroll.grid(column=1, row=1)
 #ttk.Label(mainframe, text="Some more text").grid(column=2, row=0)
 #plotToCanvas()
 
