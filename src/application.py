@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg, NavigationToolbar2Tk)
 from matplotlib import pyplot as plt
+import gc
 #import functools
 
 #files = ["../csv-samples/20220128_13-44-01_DS007_LargeGrains.csv",
@@ -35,10 +36,11 @@ class FileEntry:
     def getFilename(self):
         return self.filename
 
-    def __del__(self):
-        print("destroys should be called")
+    def destroy(self):
         self.label.destroy()
         self.button.destroy()
+
+
 
 class FileEntryMan:
     """
@@ -74,13 +76,14 @@ class FileEntryMan:
 
     def removeFileEntry(self, fileEntry):
         if fileEntry is self.head:
-            print("filEntry is self.head")
+            #print("fileEntry is self.head")
             self.head = self.head.nextNode
             if self.head is not None:
                 self.head.prevNode = None
         else:
             fileEntry.nextNode.prevNode = fileEntry.prevNode
             fileEntry.prevNode.nextNode = fileEntry.nextNode
+        fileEntry.destroy()
         del fileEntry
         self.currentIndex -= 1
 
@@ -110,7 +113,7 @@ def plotToCanvas():
     #canvas.draw()
     #canvas.get_tk_widget().grid(column=2, row=1)
     #return canvas
-    print(files.fileNames())
+    #print(files.fileNames())
     figure = plotter.plotPressureAndTemp(files.fileNames())
     plt.show()
 
@@ -140,7 +143,9 @@ def addFile():
     plotToCanvas()
 
 def removeFile(fileEntry):
+    fileEntry.label.destroy()
     files.removeFileEntry(fileEntry)
+    gc.collect()
     frame2.update()
     plotToCanvas()
     #index = button.grid_info()["row"]
