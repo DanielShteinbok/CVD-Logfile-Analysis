@@ -122,6 +122,8 @@ def translateAndUpdateLambda(lines, figure):
 
 def addFile():
     filename = filedialog.askopenfilename()
+    if type(filename) is not str or filename == '':
+        return
 
     label = ttk.Label(frame2, text=filename)
     label.grid(column=0, row=files.currentIndex)
