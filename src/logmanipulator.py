@@ -191,6 +191,9 @@ def processToBigDict(dictReader, dateConverter=processDate, timeConverter=proces
     # go through all rows via dictReader, add those values to the allDataDict
     allDataDictObj = DataDict(isGrowthLog)
 
+    firstRow = next(dictReader)
+    for key in firstRow:
+        allDataDictObj.appendData(key, firstRow[key])
     for row in dictReader:
         for key in row:
             # for each key in the row, 
